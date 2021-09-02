@@ -97,7 +97,7 @@ static uint64_t gdt[3] = { 0, 0x00af9a000000ffff, 0x00cf92000000ffff };
 /* Project 1 */
 struct list wakeup_list;
 
-static bool descending_wakeup_time(const struct list_elem* lhs, const list_elem* rhs, void* aux) {
+static bool descending_wakeup_time(const struct list_elem* lhs, const struct list_elem* rhs, void* aux) {
 	const struct thread *prev_thread = list_entry(lhs, struct thread, elem);
 	const struct thread *next_thread = list_entry(rhs, struct thread, elem);
 	return prev_thread->wakeup_time > next_thread->wakeup_time;	
@@ -136,7 +136,6 @@ thread_awake(int64_t current_time) {
 		}
 	}
 }
-
 
 /* Project 1 */
 
