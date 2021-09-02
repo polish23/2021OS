@@ -87,7 +87,6 @@ typedef int tid_t;
  * blocked state is on a semaphore wait list. */
 
 /* Project 1 */
-void push_list_in_order(struct list *list, struct list_elem *elem);
 void thread_sleep(int64_t wakeup_time);
 void thread_awake(int64_t current_time);
 /* Project 1 */

@@ -95,22 +95,12 @@ static uint64_t gdt[3] = { 0, 0x00af9a000000ffff, 0x00cf92000000ffff };
 
 
 /* Project 1 */
-static struct list wakeup_list;
+struct list wakeup_list;
 
-void
-push_list_in_order(struct list *list, struct list_elem *elem) {
-	struct list_elem *e = list_begin(&list);
-
-	struct thread *t1 = list_entry(e, struct thread, elem);
-	struct thread *t2 = list_entry(elem, struct thread, elem);
-	
-	while(t1->wakeup_time < t2->wakeup_time) {
-		e = list_next(e);
-
-		t1 = list_entry(e, struct thread, elem);
-	}
-
-	list_insert(&e, elem);
+static bool descending_wakeup_time(const struct list_elem* lhs, const list_elem* rhs, void* aux) {
+	const struct thread *prev_thread = list_entry(lhs, struct thread, elem);
+	const struct thread *next_thread = list_entry(rhs, struct thread, elem);
+	return prev_thread->wakeup_time > next_thread->wakeup_time;	
 }
 
 void
@@ -124,7 +114,7 @@ thread_sleep(int64_t wakeup_time) {
 
 	current_thread->wakeup_time = wakeup_time;
 
-	push_list_in_order(&wakeup_list, &current_thread->elem);
+	list_insert_ordered(&wakeup_list, &(current_thread->elem), descending_wakeup_time, 0);
 
 	thread_block();
 
@@ -133,9 +123,9 @@ thread_sleep(int64_t wakeup_time) {
 
 void
 thread_awake(int64_t current_time) {
-	struct list_elem *e = list_begin(&wakeup_list);
+	struct list_elem *e = list_end(&wakeup_list);
 
-	while(e != list_end(&wakeup_list)) {
+	while(e != list_head(&wakeup_list)) {
 		struct thread *t = list_entry(e, struct thread, elem);
 
 		if(current_time >= t->wakeup_time) {
