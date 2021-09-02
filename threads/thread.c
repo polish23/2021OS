@@ -92,6 +92,64 @@ static uint64_t gdt[3] = { 0, 0x00af9a000000ffff, 0x00cf92000000ffff };
 
    It is not safe to call thread_current() until this function
    finishes. */
+
+
+/* Project 1 */
+static struct list wakeup_list;
+
+void
+push_list_in_order(struct list *list, struct list_elem *elem) {
+	struct list_elem *e = list_begin(&list);
+
+	struct thread *t1 = list_entry(e, struct thread, elem);
+	struct thread *t2 = list_entry(elem, struct thread, elem);
+	
+	while(t1->wakeup_time < t2->wakeup_time) {
+		e = list_next(e);
+
+		t1 = list_entry(e, struct thread, elem);
+	}
+
+	list_insert(&e, elem);
+}
+
+void
+thread_sleep(int64_t wakeup_time) {
+	enum intr_level prev_level;
+	prev_level = intr_disable();
+
+	struct thread *current_thread;
+	current_thread = thread_current();
+	ASSERT(current_thread != idle_thread);
+
+	push_list_in_order(&wakeup_list, &current_thread->elem);
+
+	thread_block();
+
+	intr_set_level(prev_level);
+}
+
+void
+thread_awake(int64_t current_time) {
+	struct list_elem *e = list_begin(&wakeup_list);
+
+	while(e != list_end(&wakeup_list)) {
+		struct thread *t = list_entry(e, struct thread, elem);
+
+		if(current_time >= t->wakeup_time) {
+			e = list_remove(&t->elem);
+			thread_unblock(t);
+		} else {
+			break;
+		}
+	}
+}
+
+
+/* Project 1 */
+
+
+
 void
 thread_init (void) {
 	ASSERT (intr_get_level () == INTR_OFF);
@@ -109,6 +167,10 @@ thread_init (void) {
 	lock_init (&tid_lock);
 	list_init (&ready_list);
 	list_init (&destruction_req);
+
+	/* Project 1 */
+	list_init (&wakeup_list);
+	/* Project 1 */
 
 	/* Set up a thread structure for the running thread. */
 	initial_thread = running_thread ();

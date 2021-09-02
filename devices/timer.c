@@ -8,6 +8,10 @@
 #include "threads/synch.h"
 #include "threads/thread.h"
 
+/* Project 1 */
+#include "threads/thread.c"
+/* Project 1 */
+
 /* See [8254] for hardware details of the 8254 timer chip. */
 
 #if TIMER_FREQ < 19
@@ -126,6 +130,14 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
+
+	/* Project 1 */
+	struct thread *t = list_entry(list_head(&wakeup_list), struct thread, elem);
+
+	if(t->wakeup_time <= ticks) {
+		thread_awake(ticks);
+	}
+	/* Project 1 */
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

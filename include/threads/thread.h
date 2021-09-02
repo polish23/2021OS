@@ -85,6 +85,14 @@ typedef int tid_t;
  * only because they are mutually exclusive: only a thread in the
  * ready state is on the run queue, whereas only a thread in the
  * blocked state is on a semaphore wait list. */
+
+/* Project 1 */
+void push_list_in_order(struct list *list, struct list_elem *elem);
+void thread_sleep(int64_t wakeup_time);
+void thread_awake(int64_t current_time);
+/* Project 1 */
+
+
 struct thread {
 	/* Owned by thread.c. */
 	tid_t tid;                          /* Thread identifier. */
@@ -94,6 +102,10 @@ struct thread {
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
+
+	/* Project 1 */
+	int64_t wakeup_time;
+	/* Project 1 */
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
