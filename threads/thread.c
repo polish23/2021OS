@@ -122,6 +122,8 @@ thread_sleep(int64_t wakeup_time) {
 	current_thread = thread_current();
 	ASSERT(current_thread != idle_thread);
 
+	current_thread->wakeup_time = wakeup_time;
+
 	push_list_in_order(&wakeup_list, &current_thread->elem);
 
 	thread_block();
